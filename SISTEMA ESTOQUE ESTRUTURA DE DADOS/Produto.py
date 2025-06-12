@@ -2,7 +2,7 @@ from datetime import datetime
 import json
 
 class Produto:
-    def __init__(self , codigo , lote , nome , peso , data_validade , data_fabricacao , preco_compra , preco_venda , fornecedor , fabricante , categoria):
+    def __init__(self , codigo , lote , nome , peso , data_validade , data_fabricacao , preco_compra , preco_venda , fornecedor , fabricante , categoria, capacidade_engradado=None):
         self.codigo = codigo
         self.lote = lote
         self.nome = nome 
@@ -14,6 +14,7 @@ class Produto:
         self.fornecedor = fornecedor
         self.fabricante = fabricante
         self.categoria = categoria
+        self.capacidade_engradado = capacidade_engradado # Novo atributo
         
     def para_dicionario(self):
         return {
@@ -27,7 +28,8 @@ class Produto:
             'preco_venda': self.preco_venda,
             'fornecedor': self.fornecedor,
             'fabricante': self.fabricante,
-            'categoria': self.categoria
+            'categoria': self.categoria,
+            'capacidade_engradado': self.capacidade_engradado # Adiciona ao dicionário
         }
 
 def salvar_produtos(lista_produtos, nome_arquivo):
@@ -41,6 +43,8 @@ def carregar_produtos(nome_arquivo):
         with open(nome_arquivo, 'r', encoding='utf-8') as f:
             lista_dict = json.load(f)
             for d in lista_dict:
+                # Carrega o novo atributo, com um valor padrão se não existir (para compatibilidade com arquivos antigos)
+                capacidade = d.get('capacidade_engradado') 
                 produto = Produto(
                     d['codigo'],
                     d['lote'],
@@ -52,7 +56,8 @@ def carregar_produtos(nome_arquivo):
                     d['preco_venda'],
                     d['fornecedor'],
                     d['fabricante'],
-                    d['categoria']
+                    d['categoria'],
+                    capacidade_engradado=capacidade # Passa o novo atributo
                 )
                 lista_produtos.append(produto)
     except FileNotFoundError:

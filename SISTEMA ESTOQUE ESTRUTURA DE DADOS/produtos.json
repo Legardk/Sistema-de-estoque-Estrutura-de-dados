@@ -10,7 +10,8 @@
         "preco_venda": 200.0,
         "fornecedor": "ZAZA",
         "fabricante": "Pampers",
-        "categoria": "Farmacia"
+        "categoria": "Farmacia",
+        "capacidade_engradado": null
     },
     {
         "codigo": "2",
@@ -23,7 +24,8 @@
         "preco_venda": 40.0,
         "fornecedor": "Tiago",
         "fabricante": "Tilibra",
-        "categoria": "Papelaria"
+        "categoria": "Papelaria",
+        "capacidade_engradado": null
     },
     {
         "codigo": "001",
@@ -36,7 +38,8 @@
         "preco_venda": 5.0,
         "fornecedor": "LM",
         "fabricante": "Bauduco",
-        "categoria": "Alimentos"
+        "categoria": "Alimentos",
+        "capacidade_engradado": null
     },
     {
         "codigo": "208388",
@@ -49,7 +52,8 @@
         "preco_venda": 30.0,
         "fornecedor": "Atacadão",
         "fabricante": "Dona Benta",
-        "categoria": "Alimentos Integrais"
+        "categoria": "Alimentos Integrais",
+        "capacidade_engradado": null
     },
     {
         "codigo": "208389",
@@ -62,6 +66,35 @@
         "preco_venda": 50.0,
         "fornecedor": "EU",
         "fabricante": "Nestle",
-        "categoria": "ISiadj"
+        "categoria": "ISiadj",
+        "capacidade_engradado": null
+    },
+    {
+        "codigo": "203",
+        "lote": "1",
+        "nome": "Bananas",
+        "peso": 200.0,
+        "data_validade": "2025-06-30",
+        "data_fabricacao": "2025-05-10",
+        "preco_compra": 80.0,
+        "preco_venda": 600.0,
+        "fornecedor": "Ze",
+        "fabricante": "Deus",
+        "categoria": "Frutas",
+        "capacidade_engradado": null
+    },
+    {
+        "codigo": "007",
+        "lote": "03",
+        "nome": "mamao",
+        "peso": 1.0,
+        "data_validade": "2025-06-30",
+        "data_fabricacao": "2025-01-02",
+        "preco_compra": 20.0,
+        "preco_venda": 40.0,
+        "fornecedor": "God",
+        "fabricante": "Deus",
+        "categoria": "Frutas",
+        "capacidade_engradado": 100
     }
 ]

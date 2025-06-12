@@ -1,8 +1,27 @@
 [
     [
-        [],
-        [],
-        [],
+        [
+            {
+                "produto_codigo": "2",
+                "quantidade": 5
+            }
+        ],
+        [
+            {
+                "produto_codigo": "203",
+                "quantidade": 44
+            },
+            {
+                "produto_codigo": "203",
+                "quantidade": 6
+            }
+        ],
+        [
+            {
+                "produto_codigo": "007",
+                "quantidade": 50
+            }
+        ],
         [],
         []
     ],

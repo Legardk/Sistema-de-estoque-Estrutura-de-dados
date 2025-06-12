@@ -1,18 +1,15 @@
 import json
-import os  # <- IMPORTANTE: Adicionar a biblioteca OS
+import os
 from Produto import Produto, carregar_produtos, salvar_produtos
 from Engradado import Engradado
 from Estoque import Estoque
 from Fila_de_Pedidos import FilaPedidos
 from Pedido import Pedido
+from datetime import datetime, timedelta
 
 # --- CONSTRUÇÃO DINÂMICA E SEGURA DO CAMINHO PARA OS ARQUIVOS ---
 
-# Pega o caminho absoluto da pasta onde este script (Menu.py) está localizado
 CAMINHO_BASE = os.path.dirname(os.path.abspath(__file__))
-
-# Combina o caminho base com o nome de cada arquivo JSON
-# Isso garante que o Python sempre encontrará os arquivos, não importa de onde você execute o projeto.
 ARQUIVO_PRODUTOS = os.path.join(CAMINHO_BASE, 'produtos.json')
 ARQUIVO_ESTOQUE = os.path.join(CAMINHO_BASE, 'estoque.json')
 ARQUIVO_PEDIDOS = os.path.join(CAMINHO_BASE, 'pedidos.json')
@@ -20,22 +17,16 @@ ARQUIVO_PEDIDOS = os.path.join(CAMINHO_BASE, 'pedidos.json')
 
 # --- Inicialização do Sistema ---
 print("--- Carregando Sistema de Estoque ---")
-# Carrega os produtos existentes do arquivo JSON
 produtos_cadastrados = carregar_produtos(ARQUIVO_PRODUTOS)
-
-# Cria uma instância do Estoque e carrega os dados
 estoque = Estoque()
 estoque.carregar_estoque(ARQUIVO_ESTOQUE)
-
-# Cria uma instância da Fila de Pedidos e carrega os dados
 fila_pedidos = FilaPedidos()
 fila_pedidos.carregar_pedidos(ARQUIVO_PEDIDOS)
 print("--- Sistema Carregado com Sucesso ---\n")
 
-# --- Funções do Menu (as funções como cadastrar_novo_produto, etc., continuam as mesmas) ---
+# --- Funções do Menu ---
 
 def cadastrar_novo_produto():
-    # (Seu código original aqui)
     print("\n--- Cadastro de Novo Produto ---")
     codigo = input("Código: ")
     
@@ -45,29 +36,55 @@ def cadastrar_novo_produto():
 
     lote = input("Lote: ")
     nome = input("Nome: ")
-    peso = float(input("Peso: "))
+    
+    try:
+        peso = float(input("Peso: "))
+        capacidade_engradado_str = input("Capacidade máxima de unidades por engradado para este produto (deixe em branco para ilimitado): ")
+        if capacidade_engradado_str == "":
+            capacidade_engradado = None
+        else:
+            capacidade_engradado = int(capacidade_engradado_str)
+            if capacidade_engradado <= 0:
+                print("A capacidade do engradado deve ser um número positivo ou deixada em branco.")
+                return
+    except ValueError:
+        print("Erro: Peso ou capacidade do engradado inválido.")
+        return
+
     data_validade = input("Data de validade (YYYY-MM-DD): ")
     data_fabricacao = input("Data de fabricação (YYYY-MM-DD): ")
-    preco_compra = float(input("Preço de compra: "))
-    preco_venda = float(input("Preço de venda: "))
+    
+    try:
+        preco_compra = float(input("Preço de compra: "))
+        preco_venda = float(input("Preço de venda: "))
+    except ValueError:
+        print("Erro: Preço de compra ou venda inválido.")
+        return
+
     fornecedor = input("Fornecedor: ")
     fabricante = input("Fabricante: ")
     categoria = input("Categoria: ")
 
     novo_produto = Produto(
         codigo, lote, nome, peso, data_validade, data_fabricacao,
-        preco_compra, preco_venda, fornecedor, fabricante, categoria
+        preco_compra, preco_venda, fornecedor, fabricante, categoria,
+        capacidade_engradado=capacidade_engradado
     )
     produtos_cadastrados.append(novo_produto)
     print(f"\nProduto '{nome}' cadastrado com sucesso!")
 
 
 def adicionar_engradado_estoque():
-    # (Seu código original aqui)
     print("\n--- Adicionar Engradado ao Estoque ---")
     codigo_produto = input("Código do produto: ")
 
-    if not any(p.codigo == codigo_produto for p in produtos_cadastrados):
+    produto_encontrado = None
+    for p in produtos_cadastrados:
+        if p.codigo == codigo_produto:
+            produto_encontrado = p
+            break
+
+    if not produto_encontrado:
         print("Erro: Nenhum produto encontrado com este código. Cadastre o produto primeiro.")
         return
         
@@ -75,6 +92,9 @@ def adicionar_engradado_estoque():
         quantidade = int(input("Quantidade de itens no engradado: "))
         if quantidade <= 0:
             print("A quantidade deve ser um número positivo.")
+            return
+        if produto_encontrado.capacidade_engradado is not None and quantidade > produto_encontrado.capacidade_engradado:
+            print(f"Erro: A quantidade ({quantidade}) excede a capacidade máxima de engradado para este produto ({produto_encontrado.capacidade_engradado}).")
             return
     except ValueError:
         print("Erro: Quantidade inválida.")
@@ -89,10 +109,13 @@ def adicionar_engradado_estoque():
 
 
 def remover_unidades_estoque():
-    # (Seu código original aqui)
     print("\n--- Remover Unidades do Estoque ---")
     codigo = input("Código do produto para remover: ")
     
+    if not any(p.codigo == codigo for p in produtos_cadastrados):
+        print("Erro: Nenhum produto encontrado com este código.")
+        return
+
     try:
         quantidade = int(input("Quantidade a remover: "))
         if quantidade <= 0:
@@ -101,23 +124,26 @@ def remover_unidades_estoque():
     except ValueError:
         print("Erro: Quantidade inválida.")
         return
+    
+    total_disponivel = estoque.contar_por_produto(codigo)
+    if total_disponivel < quantidade:
+        print(f"Erro: Quantidade insuficiente em estoque. Disponível: {total_disponivel} unidades.")
+        return
 
-    engradados_removidos = estoque.remover_engradado(codigo, quantidade)
+    remocao_sucesso = estoque.remover_engradado(codigo, quantidade)
 
-    if engradados_removidos is not None:
-        print(f"\nRemoção concluída com sucesso.")
+    if remocao_sucesso:
+        print(f"\nRemoção de {quantidade} unidades do produto {codigo} concluída com sucesso.")
     else:
         print("\nNão foi possível remover a quantidade desejada (estoque insuficiente ou produto não encontrado).")
 
 
 def visualizar_estoque():
-    # (Seu código original aqui)
     print("\n--- Visualização do Estoque ---")
     estoque.visualizar()
 
 
 def registrar_pedido():
-    # (Seu código original aqui)
     print("\n--- Registrar Novo Pedido ---")
     codigo_produto = input("Código do produto: ")
     
@@ -146,7 +172,6 @@ def registrar_pedido():
 
 
 def processar_pedidos():
-    # (Seu código original aqui)
     print("\n--- Processando Pedido ---")
     if not fila_pedidos.fila:
         print("Não há pedidos na fila para processar.")
@@ -155,9 +180,8 @@ def processar_pedidos():
     fila_pedidos.processar_pedido(estoque)
 
 
-def gerar_relatorios():
-    # (Seu código original aqui)
-    print("\n--- Relatório de Estoque por Produto ---")
+def gerar_relatorio_estoque_geral(): # Renomeada para clareza
+    print("\n--- Relatório de Estoque por Produto (Geral) ---")
     if not produtos_cadastrados:
         print("Nenhum produto cadastrado.")
         return
@@ -165,6 +189,59 @@ def gerar_relatorios():
     for produto in produtos_cadastrados:
         total_unidades = estoque.contar_por_produto(produto.codigo)
         print(f"Produto: {produto.nome} (Cód: {produto.codigo}) - Total em Estoque: {total_unidades} unidades")
+
+
+def gerar_relatorio_vencimento():
+    print("\n--- Relatório de Produtos Próximos ao Vencimento (Próximos 30 dias) ---")
+    produtos_vencendo = estoque.obter_produtos_proximos_vencimento(produtos_cadastrados)
+    
+    if not produtos_vencendo:
+        print("Nenhum produto próximo ao vencimento nos próximos 30 dias.")
+        return
+
+    for item in produtos_vencendo:
+        print(f"  Produto: {item['nome']} (Cód: {item['codigo']}), Lote: {item['lote']}, Quantidade no engradado: {item['quantidade_engradado']}, Vencimento: {item['data_validade']}")
+
+def gerar_relatorio_itens_em_falta():
+    print("\n--- Relatório de Itens em Falta (Estoque abaixo de 10 unidades) ---")
+    itens_em_falta = estoque.obter_itens_em_falta(produtos_cadastrados)
+
+    if not itens_em_falta:
+        print("Nenhum item em falta (todos com estoque acima de 10 unidades).")
+        return
+
+    for item in itens_em_falta:
+        print(f"  Produto: {item['nome']} (Cód: {item['codigo']}) - Em Estoque: {item['total_em_estoque']} unidades, Faltam para o limite ({item['limite_baixo']}): {item['faltando']} unidades.")
+
+def gerar_historico_pedidos_atendidos():
+    print("\n--- Histórico de Pedidos Atendidos ---")
+    historico = fila_pedidos.obter_historico_pedidos_atendidos()
+
+    if not historico:
+        print("Nenhum pedido foi atendido ainda.")
+        return
+
+    for pedido in historico:
+        nome_produto = "Desconhecido"
+        for p in produtos_cadastrados:
+            if p.codigo == pedido.codigo_produto:
+                nome_produto = p.nome
+                break
+
+        print(f"  Pedido de: {pedido.solicitante}, Produto: {nome_produto} (Cód: {pedido.codigo_produto}), Quantidade: {pedido.quantidade}, Data: {pedido.data_solicitacao.strftime('%Y-%m-%d')}")
+
+# --- NOVA FUNÇÃO PARA JUNTAR TODOS OS RELATÓRIOS ---
+def gerar_todos_relatorios():
+    print("\n=========== GERANDO TODOS OS RELATÓRIOS ===========")
+    gerar_relatorio_estoque_geral()
+    print("\n---------------------------------------------------")
+    gerar_relatorio_vencimento()
+    print("\n---------------------------------------------------")
+    gerar_relatorio_itens_em_falta()
+    print("\n---------------------------------------------------")
+    gerar_historico_pedidos_atendidos()
+    print("\n================= FIM DOS RELATÓRIOS ================\n")
+
 
 def salvar_tudo():
     """Salva o estado de todos os dados do sistema (produtos, estoque, pedidos)."""
@@ -183,8 +260,8 @@ def menu():
         print("4. Visualizar Estoque")
         print("5. Registrar Pedido de Cliente")
         print("6. Processar Próximo Pedido da Fila")
-        print("7. Gerar Relatório de Estoque")
-        print("8. Salvar Tudo")
+        print("7. Gerar Todos os Relatórios") # Opção 7 agora chama a nova função
+        print("8. Salvar Tudo") # Reajustado para 8
         print("0. Sair")
         print("==================================================")
 
@@ -202,9 +279,9 @@ def menu():
             registrar_pedido()
         elif opcao == '6':
             processar_pedidos()
-        elif opcao == '7':
-            gerar_relatorios()
-        elif opcao == '8':
+        elif opcao == '7': # Chama a nova função que agrega os relatórios
+            gerar_todos_relatorios()
+        elif opcao == '8': # Opção para salvar tudo
             salvar_tudo()
         elif opcao == '0':
             salvar_tudo()
