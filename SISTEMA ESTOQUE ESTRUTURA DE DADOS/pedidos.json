@@ -1,0 +1,14 @@
+[
+    {
+        "codigo_produto": "208388",
+        "quantidade": 10,
+        "data_solicitacao": "2025-06-11",
+        "solicitante": "Kauã"
+    },
+    {
+        "codigo_produto": "208388",
+        "quantidade": 5,
+        "data_solicitacao": "2025-06-10",
+        "solicitante": "Miguel"
+    }
+]
