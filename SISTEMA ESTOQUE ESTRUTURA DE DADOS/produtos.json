@@ -96,5 +96,19 @@
         "fabricante": "Deus",
         "categoria": "Frutas",
         "capacidade_engradado": 100
+    },
+    {
+        "codigo": "070206",
+        "lote": "1",
+        "nome": "Aveia",
+        "peso": 10.0,
+        "data_validade": "2027-10-01",
+        "data_fabricacao": "2025-06-12",
+        "preco_compra": 200.0,
+        "preco_venda": 600.0,
+        "fornecedor": "Quon",
+        "fabricante": "Quaker",
+        "categoria": "Cereais",
+        "capacidade_engradado": 5
     }
 ]

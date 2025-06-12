@@ -17,6 +17,12 @@
             "quantidade": 45,
             "data_solicitacao": "2025-02-15",
             "solicitante": "kjkj"
+        },
+        {
+            "codigo_produto": "070206",
+            "quantidade": 1,
+            "data_solicitacao": "2025-12-12",
+            "solicitante": "Kauã"
         }
     ],
     "historico_atendidos": []
